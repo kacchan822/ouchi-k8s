@@ -1,0 +1,53 @@
+# このファイルには、クラスターアドオンとアプリケーションを管理するための
+# 2つのルートApplicationリソースが含まれています。
+#
+# !!! 重要 !!!
+# 使用する前に、`YOUR_GIT_REPO_URL` をあなたのGitリポジトリのURLに置き換えてください。
+# 例: https://github.com/your-username/your-repo.git
+
+apiVersion: v1
+kind: List
+items:
+- apiVersion: argoproj.io/v1alpha1
+  kind: Application
+  metadata:
+    name: cluster-addons
+    namespace: argocd
+    finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  spec:
+    project: home-cluster
+    source:
+      repoURL: https://github.com/kacchan822/ouchi-k8s
+      targetRevision: HEAD
+      path: cluster/addons
+    destination:
+      server: https://kubernetes.default.svc
+      # namespaceは各アドオンのApplication定義で指定するため、ここでは指定しない
+      namespace: default
+    syncPolicy:
+      automated:
+        prune: true
+        selfHeal: true
+
+- apiVersion: argoproj.io/v1alpha1
+  kind: Application
+  metadata:
+    name: apps
+    namespace: argocd
+    finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  spec:
+    project: home-cluster
+    source:
+      repoURL: https://github.com/kacchan822/ouchi-k8s
+      targetRevision: HEAD
+      path: apps
+    destination:
+      server: https://kubernetes.default.svc
+      # namespaceは各アプリのApplication定義で指定するため、ここでは指定しない
+      namespace: default
+    syncPolicy:
+      automated:
+        prune: true
+        selfHeal: true

@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metallb
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: home-cluster
+  source:
+    # MetalLBの公式Helmチャートリポジトリ
+    repoURL: https://metallb.github.io/metallb
+    chart: metallb
+    # 特定のバージョンを指定することを推奨します
+    targetRevision: 0.13.10
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: metallb-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    # デプロイ先のnamespaceが存在しない場合に自動で作成します
+    - CreateNamespace=true

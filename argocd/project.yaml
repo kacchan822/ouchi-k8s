@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: default
+  namespace: argocd
+  # このプロジェクトを参照するApplicationがなくなるまで削除をブロックするためのFinalizer
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Default project for the cluster
+
+  # このGitリポジトリからのデプロイを許可
+  # 本番環境では特定のGitリポジトリに限定することが推奨されます
+  sourceRepos:
+  - '*'
+
+  # ArgoCDが稼働しているクラスターへのデプロイを許可
+  destinations:
+  - namespace: '*'
+    server: https://kubernetes.default.svc
+
+  # クラスタースコープのリソースをすべて許可
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+
+  # ネームスペーススコープのリソースをすべて許可
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'

@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    # cert-managerの公式Helmチャートリポジトリ
+    repoURL: https://charts.jetstack.io
+    chart: cert-manager
+    # 特定のバージョンを指定することを推奨します
+    targetRevision: v1.10.1
+    helm:
+      values: |
+        installCRDs: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    # デプロイ先のnamespaceが存在しない場合に自動で作成します
+    - CreateNamespace=true

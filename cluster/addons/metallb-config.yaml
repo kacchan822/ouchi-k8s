@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metallb-config
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  # MetalLB本体(wave 0)がデプロイされた後にこの設定(wave 1)が適用されるようにします
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/kacchan822/ouchi-k8s
+    path: cluster/core/metallb-config
+    targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    # この設定はmetallb-system名前空間に適用する必要があります
+    namespace: metallb-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      # metallb-system名前空間はmetallbのApplicationが作成するので、ここでは作成しない
+      - CreateNamespace=false

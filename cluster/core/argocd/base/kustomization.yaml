@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# ArgoCDの公式インストールマニフェストをリモートで参照します。
+# バージョンを固定するために、'stable'ではなく特定のバージョンタグを使うことが推奨されます。
+resources:
+  - https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# --- カスタマイズ例 ---
+# ここにパッチを追加することで、ベースのマニフェストをカスタマイズできます。
+# 例えば、argocd-cmd-params-cm ConfigMapを上書きして、
+# サーバーのログレベルを変更する場合は、以下のようにします。
+#
+# 1. `patches/argocd-cmd-params-cm.yaml` ファイルを作成:
+#    apiVersion: v1
+#    kind: ConfigMap
+#    metadata:
+#      name: argocd-cmd-params-cm
+#    data:
+#      server.log.level: debug
+#
+# 2. このkustomization.yamlに以下の`patches`セクションを追加:
+#    patches:
+#    - path: patches/argocd-cmd-params-cm.yaml
+#      target:
+#        kind: ConfigMap
+#        name: argocd-cmd-params-cm
+#
+# --------------------
+# patches:
+# - path: patches/custom-params.yaml

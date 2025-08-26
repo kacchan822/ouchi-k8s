@@ -16,7 +16,7 @@ items:
     finalizers:
     - resources-finalizer.argocd.argoproj.io
   spec:
-    project: home-cluster
+    project: default
     source:
       repoURL: https://github.com/kacchan822/ouchi-k8s
       targetRevision: HEAD
@@ -38,7 +38,7 @@ items:
     finalizers:
     - resources-finalizer.argocd.argoproj.io
   spec:
-    project: home-cluster
+    project: default
     source:
       repoURL: https://github.com/kacchan822/ouchi-k8s
       targetRevision: HEAD

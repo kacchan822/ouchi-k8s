@@ -7,7 +7,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: home-cluster
+  project: default
   source:
     # サンプルとして、podinfoというアプリケーションのHelmチャートを指定します
     repoURL: https://stefanprodan.github.io/podinfo

@@ -6,7 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: home-cluster
+  project: default
   source:
     # cert-managerの公式Helmチャートリポジトリ
     repoURL: https://charts.jetstack.io

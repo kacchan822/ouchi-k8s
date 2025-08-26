@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    # このリポジトリのURL
+    repoURL: https://github.com/kacchan822/ouchi-k8s
+    # Kustomizeのオーバーレイディレクトリを指すように変更
+    path: cluster/core/argocd/overlays/default
+    targetRevision: HEAD
+  destination:
+    # デプロイ先のクラスタ (ArgoCDが動作しているクラスタ)
+    server: https://kubernetes.default.svc
+    # デプロイ先のネームスペース
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+
+  # ArgoCDが自身を管理する際に、statusの変更を無視して無限ループを防ぐための設定
+  ignoreDifferences:
+  - group: argoproj.io
+    kind: Application
+    name: argocd
+    namespace: argocd
+    jsonPointers:
+    - /status

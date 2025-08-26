@@ -1,0 +1,8 @@
+# apps/cert-manager-config/cluster-issuer.yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: ouchi-cluster-issuer
+spec:
+  ca:
+    secretName: ouchi-ca-secret

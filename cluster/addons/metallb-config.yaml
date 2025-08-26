@@ -25,3 +25,4 @@ spec:
     syncOptions:
       # metallb-system名前空間はmetallbのApplicationが作成するので、ここでは作成しない
       - CreateNamespace=false
+      - ServerSideApply=true

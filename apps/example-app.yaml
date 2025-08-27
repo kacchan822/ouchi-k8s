@@ -16,7 +16,7 @@ spec:
     helm:
       # Helmのvalues.yamlに相当する設定をここに記述できます
       values: |
-        replicaCount: 2
+        replicaCount: 5
         service:
           type: LoadBalancer
   destination:

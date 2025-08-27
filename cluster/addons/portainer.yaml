@@ -13,6 +13,12 @@ spec:
     repoURL: https://portainer.github.io/k8s/
     chart: portainer
     targetRevision: 2.33.1
+    helm:
+      values: |
+        service:
+          type: LoadBalancer
+        persistence:
+          storageClass: "nfs-client"
   destination:
     server: https://kubernetes.default.svc
     namespace: portainer

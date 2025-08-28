@@ -1,0 +1,3 @@
+# Ignore sensitive files
+*secret.yaml
+*secrets.yaml

@@ -1,0 +1,60 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: n8n
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://community-charts.github.io/helm-charts
+    chart: n8n
+    targetRevision: 1.13.10
+    helm:
+      values: |
+        # n8n general configuration
+        timezone: "Asia/Tokyo"
+
+        # Use an existing secret for the encryption key.
+        # The user must create this secret in the 'n8n' namespace.
+        # See 'n8n-secrets.yaml.example' for the required template.
+        existingEncryptionKeySecret: "n8n-secrets"
+
+        # Expose n8n via a LoadBalancer service as requested.
+        service:
+          type: LoadBalancer
+
+        # Disable the co-deployed postgresql as we are using an external one.
+        postgresql:
+          enabled: false
+
+        # Configure the external PostgreSQL database connection.
+        # This connects to the 'postgres' application deployed separately.
+        db:
+          type: postgresdb
+        externalPostgresql:
+          host: postgres-postgresql.n8n.svc.cluster.local
+          port: 5432
+          username: "n8n"
+          database: "n8n"
+          # Use an existing secret for the password. This refers to the secret
+          # created for the postgres application, which is in the same namespace.
+          existingSecret: "postgres-secrets"
+
+        # Persistence for n8n itself
+        main:
+          persistence:
+            enabled: true
+            storageClass: "nfs-client"
+            size: 1Gi
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: n8n
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

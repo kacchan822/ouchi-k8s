@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: postgres
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: postgresql
+    targetRevision: 16.7.27
+    helm:
+      values: |
+        # Global settings for the PostgreSQL chart
+        global:
+          storageClass: "nfs-client"
+
+        # Authentication settings
+        auth:
+          # Use an existing secret for passwords.
+          # The user must create this secret in the 'n8n' namespace.
+          # See 'postgres-secrets.yaml.example' for the required template.
+          existingSecret: "postgres-secrets"
+          # The database to create
+          database: "n8n"
+          # The user to create
+          username: "n8n"
+
+        # Persistence settings for the primary node
+        primary:
+          persistence:
+            enabled: true
+            size: 10Gi
+            # storageClass will be taken from the global setting
+
+  destination:
+    server: https://kubernetes.default.svc
+    # Deploy PostgreSQL into the 'n8n' namespace alongside the main application
+    namespace: n8n
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

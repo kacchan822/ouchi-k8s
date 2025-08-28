@@ -27,6 +27,10 @@ spec:
           database: "n8n"
           # The user to create
           username: "n8n"
+          # Define which keys in the secret to use for which password
+          secretKeys:
+            # key for the custom user password (user is 'n8n')
+            userPasswordKey: "postgres-password"
 
         # Persistence settings for the primary node
         primary:

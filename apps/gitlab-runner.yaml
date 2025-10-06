@@ -1,0 +1,64 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gitlab-runner
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://charts.gitlab.io
+    chart: gitlab-runner
+    targetRevision: 0.81.0
+    helm:
+      values: |
+        gitlabUrl: https://gitlab.com/
+
+        # GitLab Runnerの認証には、事前に作成したSecret `gitlab-runner-secrets` を使用します。
+        # このSecretには、新しい認証方式の `runner-token` が含まれている必要があります。
+        # 詳細は `gitlab-runner-secrets.yaml.example` を参照してください。
+        runners:
+          secret: gitlab-runner-secrets
+
+          # Docker-in-Docker (dind) を有効にするための設定
+          # https://zenn.dev/k8shiro/articles/gitlab-docker-runner-on-k8s を参考にしています。
+          privileged: true
+          tags: "dind, docker"
+          config: |
+            [[runners]]
+              [runners.kubernetes]
+                image = "alpine:latest"
+                privileged = true
+                # dindサービスが起動するまで待機します。
+                pre_build_script = "until docker info; do sleep 1; done"
+              # dindサービスコンテナをサイドカーとして定義します。
+              # これにより、CIジョブ内でdockerコマンドが利用可能になります。
+              # aliasを 'docker' に設定することで、DOCKER_HOST: tcp://docker:2376 で接続できます。
+              [[runners.kubernetes.services]]
+                name = "docker:24.0.5-dind"
+                alias = "docker"
+              [[runners.kubernetes.volumes.empty_dir]]
+                name = "docker-certs"
+                mount_path = "/certs/client"
+                medium = "Memory"
+          env:
+            DOCKER_HOST: tcp://docker:2376
+            DOCKER_TLS_CERTDIR: "/certs"
+            # DOCKER_TLS_VERIFYとDOCKER_CERT_PATHは、Kubernetes Executorが
+            # コンテナのエントリポイントを実行しない問題への対策として必要です。
+            # ref: https://docs.gitlab.com/ci/docker/using_docker_build.html#docker-in-docker-with-tls-enabled-in-kubernetes
+            DOCKER_TLS_VERIFY: "1"
+            DOCKER_CERT_PATH: "/certs/client"
+
+  destination:
+    server: https://kubernetes.default.svc
+    # GitLab Runnerを専用の名前空間にデプロイします。
+    namespace: gitlab-runner
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      # namespaceが存在しない場合に自動で作成します。
+      - CreateNamespace=true

@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://portainer.github.io/k8s/
     chart: portainer
-    targetRevision: 2.33.2
+    targetRevision: 2.33.1
     helm:
       values: |
         service:
